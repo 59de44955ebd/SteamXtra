@@ -37,4 +37,4 @@ ISteamUtils_GetIPCountry object me
 ## Compiling
 
 Compiling the xtra requires MS Visual Studio 2017 or later, the free community edition is of course fine.
-The repository includes both the Streamworks SDK and the Adobe XDK, so there are no other dependancies.
+The repository includes both the Streamworks SDK and the Adobe XDK, so there are no other dependencies.
