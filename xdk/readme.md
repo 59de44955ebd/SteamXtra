@@ -32,7 +32,7 @@ A descriptive index of the example Xtras is provided in <a href="Examples/exampl
       <TD>The XSupport code library. This is used in some of the examples.</TD>
     </TR>
     <TR>
-      <TD>readme.htm</TD>
+      <TD>readme.md</TD>
       <TD>This file.</TD>
     </TR>
 </TABLE>
