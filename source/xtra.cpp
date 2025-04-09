@@ -104,7 +104,7 @@ static char msgTable[] =
 	"ISteamUserStats_SetAchievement object me, string achievement\n"
 	"ISteamUserStats_GetStat object me, string statName\n"
 	"ISteamUserStats_SetStat object me, string statName, float data\n"
-	"ISteamUserStats_StoreStats object me, string achievement\n"
+	"ISteamUserStats_StoreStats object me\n"
 
 	"\n-- ISteamUtils\n"
 	"ISteamUtils_GetAppID object me\n"
