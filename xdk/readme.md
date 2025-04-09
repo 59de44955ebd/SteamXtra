@@ -1,26 +1,4 @@
 <HTML>
-<HEAD><TITLE>Director 11.5 XDK Readme</TITLE>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<style type="text/css">
-<!--
-body,td,th {
-	font-family: Verdana, Arial, Helvetica, sans-serif;
-	font-size: small;
-}
-.code {
-	font-family: monospace;
-	font-weight: normal;
-	font-size: small;
-}
-.path {
-	font-family: monospace;
-	font-size: small;
-	font-weight: bold;
-}
--->
-</style>
-</HEAD>
-
 <BODY>
 <H3>Director 11.5 XDK Readme</H3>
 <HR>
