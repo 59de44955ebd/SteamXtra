@@ -25,8 +25,10 @@ ISteamUser_GetSteamID object me
 -- ISteamUserStats
 ISteamUserStats_GetAchievement object me, string achievement
 ISteamUserStats_SetAchievement object me, string achievement
-ISteamUserStats_GetStat object me, string statName
-ISteamUserStats_SetStat object me, string statName, float data
+ISteamUserStats_GetStatFloat object me, string statName
+ISteamUserStats_SetStatFloat object me, string statName, float data
+ISteamUserStats_GetStatInt object me, string statName
+ISteamUserStats_SetStatInt object me, string statName, integer data
 ISteamUserStats_StoreStats object me
 
 -- ISteamUtils

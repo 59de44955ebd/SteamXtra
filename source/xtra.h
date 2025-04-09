@@ -100,9 +100,10 @@ private:
 	EXTERN_DEFINE_METHOD(MoaError, sx_ISteamUserStats_GetAchievement, (PMoaDrCallInfo))
 	EXTERN_DEFINE_METHOD(MoaError, sx_ISteamUserStats_SetAchievement, (PMoaDrCallInfo))
 
-	EXTERN_DEFINE_METHOD(MoaError, sx_ISteamUserStats_GetStat, (PMoaDrCallInfo))
-	EXTERN_DEFINE_METHOD(MoaError, sx_ISteamUserStats_SetStat, (PMoaDrCallInfo))
-
+	EXTERN_DEFINE_METHOD(MoaError, sx_ISteamUserStats_GetStatFloat, (PMoaDrCallInfo))
+	EXTERN_DEFINE_METHOD(MoaError, sx_ISteamUserStats_SetStatFloat, (PMoaDrCallInfo))
+	EXTERN_DEFINE_METHOD(MoaError, sx_ISteamUserStats_GetStatInt, (PMoaDrCallInfo))
+	EXTERN_DEFINE_METHOD(MoaError, sx_ISteamUserStats_SetStatInt, (PMoaDrCallInfo))
 	EXTERN_DEFINE_METHOD(MoaError, sx_ISteamUserStats_StoreStats, (PMoaDrCallInfo))
 
 	// ISteamUtils

@@ -102,8 +102,10 @@ static char msgTable[] =
 	"\n-- ISteamUserStats\n"
 	"ISteamUserStats_GetAchievement object me, string achievement\n"
 	"ISteamUserStats_SetAchievement object me, string achievement\n"
-	"ISteamUserStats_GetStat object me, string statName\n"
-	"ISteamUserStats_SetStat object me, string statName, float data\n"
+	"ISteamUserStats_GetStatFloat object me, string statName\n"
+	"ISteamUserStats_SetStatFloat object me, string statName, float data\n"
+	"ISteamUserStats_GetStatInt object me, string statName\n"
+	"ISteamUserStats_SetStatInt object me, string statName, integer data\n"
 	"ISteamUserStats_StoreStats object me\n"
 
 	"\n-- ISteamUtils\n"
@@ -138,8 +140,10 @@ enum
 	// ISteamUserStats
 	m_sx_ISteamUserStats_GetAchievement,
 	m_sx_ISteamUserStats_SetAchievement,
-	m_sx_ISteamUserStats_GetStat,
-	m_sx_ISteamUserStats_SetStat,
+	m_sx_ISteamUserStats_GetStatFloat,
+	m_sx_ISteamUserStats_SetStatFloat,
+	m_sx_ISteamUserStats_GetStatInt,
+	m_sx_ISteamUserStats_SetStatInt,
 	m_sx_ISteamUserStats_StoreStats,
 
 	// ISteamUtils
@@ -343,8 +347,10 @@ moa_try
 		// ISteamUserStats
 		CALL_CASE(sx_ISteamUserStats_GetAchievement)
 		CALL_CASE(sx_ISteamUserStats_SetAchievement)
-		CALL_CASE(sx_ISteamUserStats_GetStat)
-		CALL_CASE(sx_ISteamUserStats_SetStat)
+		CALL_CASE(sx_ISteamUserStats_GetStatFloat)
+		CALL_CASE(sx_ISteamUserStats_SetStatFloat)
+		CALL_CASE(sx_ISteamUserStats_GetStatInt)
+		CALL_CASE(sx_ISteamUserStats_SetStatInt)
 		CALL_CASE(sx_ISteamUserStats_StoreStats)
 
 		// ISteamUtils
@@ -542,9 +548,9 @@ MoaError TStdXtra_IMoaMmXScript::sx_ISteamUserStats_SetAchievement(PMoaDrCallInf
 }
 
 //###########################################################################
-// sx_ISteamUserStats_GetStat(string statName) -> float or void
+// sx_ISteamUserStats_GetStatFloat(string statName) -> float or void
 //###########################################################################
-MoaError TStdXtra_IMoaMmXScript::sx_ISteamUserStats_GetStat(PMoaDrCallInfo callPtr)
+MoaError TStdXtra_IMoaMmXScript::sx_ISteamUserStats_GetStatFloat(PMoaDrCallInfo callPtr)
 {
 	if (pObj->m_bApiInitialized)
 	{
@@ -561,9 +567,9 @@ MoaError TStdXtra_IMoaMmXScript::sx_ISteamUserStats_GetStat(PMoaDrCallInfo callP
 }
 
 //###########################################################################
-// sx_ISteamUserStats_SetStat(string statName, float data) -> bool or void
+// sx_ISteamUserStats_SetStatFloat(string statName, float data) -> bool or void
 //###########################################################################
-MoaError TStdXtra_IMoaMmXScript::sx_ISteamUserStats_SetStat(PMoaDrCallInfo callPtr)
+MoaError TStdXtra_IMoaMmXScript::sx_ISteamUserStats_SetStatFloat(PMoaDrCallInfo callPtr)
 {
 	if (pObj->m_bApiInitialized)
 	{
@@ -579,6 +585,50 @@ MoaError TStdXtra_IMoaMmXScript::sx_ISteamUserStats_SetStat(PMoaDrCallInfo callP
 		pObj->pMmValue->ValueToStringPtr(&moaValue, &statName);
 
 		bOk = SteamUserStats()->SetStat(statName, (float)data);
+		pObj->pMmValue->ValueReleaseStringPtr(&moaValue);
+		pObj->pMmValue->IntegerToValue(bOk, &callPtr->resultValue);
+	}
+	return kMoaErr_NoErr;
+}
+
+//###########################################################################
+// sx_ISteamUserStats_GetStatFloat(string statName) -> integer or void
+//###########################################################################
+MoaError TStdXtra_IMoaMmXScript::sx_ISteamUserStats_GetStatInt(PMoaDrCallInfo callPtr)
+{
+	if (pObj->m_bApiInitialized)
+	{
+		MoaMmValue moaValue = { 0 };
+		GetArgByIndex(PARAM(1), &moaValue);
+		const char *statName;
+		pObj->pMmValue->ValueToStringPtr(&moaValue, &statName);
+		int32 data = 0;
+		SteamUserStats()->GetStat(statName, &data);
+		pObj->pMmValue->ValueReleaseStringPtr(&moaValue);
+		pObj->pMmValue->IntegerToValue(data, &callPtr->resultValue);
+	}
+	return kMoaErr_NoErr;
+}
+
+//###########################################################################
+// ISteamUserStats_SetStatInt(string statName, integer data) -> bool or void
+//###########################################################################
+MoaError TStdXtra_IMoaMmXScript::sx_ISteamUserStats_SetStatInt(PMoaDrCallInfo callPtr)
+{
+	if (pObj->m_bApiInitialized)
+	{
+		bool bOk = false;
+		MoaMmValue moaValue = { 0 };
+
+		MoaLong data = 0;
+		GetArgByIndex(PARAM(2), &moaValue);
+		pObj->pMmValue->ValueToInteger(&moaValue, &data);
+
+		GetArgByIndex(PARAM(1), &moaValue);
+		const char *statName;
+		pObj->pMmValue->ValueToStringPtr(&moaValue, &statName);
+
+		bOk = SteamUserStats()->SetStat(statName, (int32)data);
 		pObj->pMmValue->ValueReleaseStringPtr(&moaValue);
 		pObj->pMmValue->IntegerToValue(bOk, &callPtr->resultValue);
 	}
