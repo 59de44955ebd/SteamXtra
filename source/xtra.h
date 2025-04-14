@@ -26,12 +26,19 @@
 
 #include "steam_api.h"
 
+// for quick runtime debugging
+#define DBGS(x) OutputDebugStringA(x)
+#define DBGI(x) {char dbg[32];sprintf(dbg,"%lld",(__int64)x);OutputDebugStringA(dbg);}
+#define DBGW(x) OutputDebugStringW(x);
+
 /* --------------------------------------------------- */
 
 // GUID
 // {B7FEBDAC-EE72-4716-AE62-2FBE661016C8}
 DEFINE_GUID(CLSID_TStdXtra,
 	0xb7febdac, 0xee72, 0x4716, 0xae, 0x62, 0x2f, 0xbe, 0x66, 0x10, 0x16, 0xc8);
+
+class CGameManager;
 
 EXTERN_BEGIN_DEFINE_CLASS_INSTANCE_VARS(TStdXtra)
 
@@ -54,10 +61,16 @@ EXTERN_BEGIN_DEFINE_CLASS_INSTANCE_VARS(TStdXtra)
 	PIMoaNotificationClient	pNotificationClient = NULL;
 #endif
 
+	CGameManager*			m_pGameManager;
 	bool					m_bApiInitialized = false;
 
-	bool					m_bISteamFriends_GameOverlayActivated = false;
-	bool					m_bISteamFriends_GameOverlayIsActive = false;
+	// for GetNumberOfCurrent (async.)
+	MoaMmSymbol				m_GetNumberOfCurrentPlayersCallback;
+	bool					m_bOnGetNumberOfCurrentPlayersReceived = false;
+	int32					m_NumPlayers;
+
+	bool					m_bOnSteamServersConnectedReceived = false;
+	bool					m_bOnSteamServersDisconnectedReceived = false;
 
 EXTERN_END_DEFINE_CLASS_INSTANCE_VARS
 
@@ -77,8 +90,6 @@ EXTERN_BEGIN_DEFINE_CLASS_INTERFACE(TStdXtra, IMoaMmXScript)
 
 	EXTERN_DEFINE_METHOD(MoaError, Call, (PMoaDrCallInfo))
 
-	STEAM_CALLBACK(TStdXtra_IMoaMmXScript, ISteamFriends_OnGameOverlayActivated, GameOverlayActivated_t);
-
 private:
 
 	// Methods that implement the Lingo commands. These are dispatched from "Call"
@@ -92,6 +103,8 @@ private:
 
 	// ISteamFriends
 	EXTERN_DEFINE_METHOD(MoaError, sx_ISteamFriends_GetPersonaName, (PMoaDrCallInfo))
+	EXTERN_DEFINE_METHOD(MoaError, sx_ISteamFriends_ActivateGameOverlay, (PMoaDrCallInfo))
+	EXTERN_DEFINE_METHOD(MoaError, sx_ISteamFriends_ActivateGameOverlayToUser, (PMoaDrCallInfo))
 
 	// ISteamUser
 	EXTERN_DEFINE_METHOD(MoaError, sx_ISteamUser_GetSteamID, (PMoaDrCallInfo))
@@ -105,12 +118,30 @@ private:
 	EXTERN_DEFINE_METHOD(MoaError, sx_ISteamUserStats_GetStatInt, (PMoaDrCallInfo))
 	EXTERN_DEFINE_METHOD(MoaError, sx_ISteamUserStats_SetStatInt, (PMoaDrCallInfo))
 	EXTERN_DEFINE_METHOD(MoaError, sx_ISteamUserStats_StoreStats, (PMoaDrCallInfo))
+	EXTERN_DEFINE_METHOD(MoaError, sx_ISteamUserStats_ResetAllStats, (PMoaDrCallInfo))
+
+	EXTERN_DEFINE_METHOD(MoaError, sx_ISteamUserStats_GetNumberOfCurrentPlayers, (PMoaDrCallInfo))
 
 	// ISteamUtils
 	EXTERN_DEFINE_METHOD(MoaError, sx_ISteamUtils_GetAppID, (PMoaDrCallInfo))
 	EXTERN_DEFINE_METHOD(MoaError, sx_ISteamUtils_GetIPCountry, (PMoaDrCallInfo))
 	
 EXTERN_END_DEFINE_CLASS_INTERFACE
+
+class CGameManager
+{
+private:
+	TStdXtra* m_pObj;
+
+public:
+	CGameManager(TStdXtra* pObj);
+
+	STEAM_CALLBACK(CGameManager, OnSteamServersConnected, SteamServersConnected_t);
+	STEAM_CALLBACK(CGameManager, OnSteamServersDisconnected, SteamServersDisconnected_t);
+
+	void OnGetNumberOfCurrentPlayers(NumberOfCurrentPlayers_t *pCallback, bool bIOFailure);
+	CCallResult<CGameManager, NumberOfCurrentPlayers_t> m_NumberOfCurrentPlayersCallResult;
+};
 
 #ifdef USING_NOTIFICATION_CLIENT
 EXTERN_BEGIN_DEFINE_CLASS_INTERFACE(TStdXtra, IMoaNotificationClient)

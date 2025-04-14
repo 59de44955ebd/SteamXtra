@@ -25,8 +25,8 @@ be found before the copy in the include folder and so you can customize it as yo
 #define DVER_MAJORVERSION 0				    
 #define DVER_MAJORVERSION_STRING "0"
 
-#define DVER_MINORVERSION 1
-#define DVER_MINORVERSION_STRING "1"     
+#define DVER_MINORVERSION 2
+#define DVER_MINORVERSION_STRING "2"     
 														
 #define DVER_BUGFIXVERSION 0
 #define DVER_BUGFIXVERSION_STRING "0"

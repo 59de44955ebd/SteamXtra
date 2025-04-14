@@ -14,10 +14,27 @@
 #define SAFE_RELEASE(x) { if (x!=NULL) x->Release(); x = NULL; }
 #define PARAM(x) (x+1)
 
-// for quick runtime debugging
-#define DBGS(x) OutputDebugStringA(x);
-#define DBGI(x) {char dbg[32];sprintf(dbg,"%ld",x);OutputDebugStringA(dbg);}
-#define DBGW(x) OutputDebugStringW(x);
+CGameManager::CGameManager(TStdXtra* pObj)
+{
+	m_pObj = pObj;
+}
+
+// Called when SteamUserStats()->GetNumberOfCurrentPlayers() returns asynchronously, after a call to SteamAPI_RunCallbacks().
+void CGameManager::OnGetNumberOfCurrentPlayers(NumberOfCurrentPlayers_t *pCallback, bool bIOFailure)
+{
+	m_pObj->m_NumPlayers = bIOFailure || !pCallback->m_bSuccess ? -1 : pCallback->m_cPlayers;
+	m_pObj->m_bOnGetNumberOfCurrentPlayersReceived = true;
+}
+
+void CGameManager::OnSteamServersConnected(SteamServersConnected_t* pCallback)
+{
+	m_pObj->m_bOnSteamServersConnectedReceived = true;
+}
+
+void CGameManager::OnSteamServersDisconnected(SteamServersDisconnected_t* pCallback)
+{
+	m_pObj->m_bOnSteamServersDisconnectedReceived = true;
+}
 
 /*******************************************************************************
  * SCRIPTING XTRA MESSAGE TABLE DESCRIPTION.
@@ -95,6 +112,9 @@ static char msgTable[] =
 
 	"\n-- ISteamFriends\n"
 	"ISteamFriends_GetPersonaName object me\n"
+	"ISteamFriends_ActivateGameOverlay object me, string dialogName\n"
+
+	"ISteamFriends_ActivateGameOverlayToUser object me, string dialogName, string steamID\n"
 
 	"\n-- ISteamUser\n"
 	"ISteamUser_GetSteamID object me\n"
@@ -107,6 +127,9 @@ static char msgTable[] =
 	"ISteamUserStats_GetStatInt object me, string statName\n"
 	"ISteamUserStats_SetStatInt object me, string statName, integer data\n"
 	"ISteamUserStats_StoreStats object me\n"
+	"ISteamUserStats_ResetAllStats object me, integer bAchievementsToo\n"
+
+	"ISteamUserStats_GetNumberOfCurrentPlayers object me, symbol callback\n"
 
 	"\n-- ISteamUtils\n"
 	"ISteamUtils_GetAppID object me\n"
@@ -133,6 +156,8 @@ enum
 
 	// ISteamFriends
 	m_sx_ISteamFriends_GetPersonaName,
+	m_sx_ISteamFriends_ActivateGameOverlay,
+	m_sx_ISteamFriends_ActivateGameOverlayToUser,
 
 	// ISteamUser
 	m_sx_ISteamUser_GetSteamID,
@@ -145,6 +170,10 @@ enum
 	m_sx_ISteamUserStats_GetStatInt,
 	m_sx_ISteamUserStats_SetStatInt,
 	m_sx_ISteamUserStats_StoreStats,
+
+	m_sx_ISteamUserStats_ResetAllStats,
+
+	m_sx_ISteamUserStats_GetNumberOfCurrentPlayers,
 
 	// ISteamUtils
 	m_sx_ISteamUtils_GetAppID,
@@ -340,6 +369,8 @@ moa_try
 			
 		// ISteamFriends
 		CALL_CASE(sx_ISteamFriends_GetPersonaName)
+		CALL_CASE(sx_ISteamFriends_ActivateGameOverlay)
+		CALL_CASE(sx_ISteamFriends_ActivateGameOverlayToUser)
 
 		// ISteamUser
 		CALL_CASE(sx_ISteamUser_GetSteamID)
@@ -352,6 +383,10 @@ moa_try
 		CALL_CASE(sx_ISteamUserStats_GetStatInt)
 		CALL_CASE(sx_ISteamUserStats_SetStatInt)
 		CALL_CASE(sx_ISteamUserStats_StoreStats)
+
+		CALL_CASE(sx_ISteamUserStats_ResetAllStats)
+			
+		CALL_CASE(sx_ISteamUserStats_GetNumberOfCurrentPlayers)
 
 		// ISteamUtils
 		CALL_CASE(sx_ISteamUtils_GetAppID)
@@ -379,16 +414,28 @@ STDMETHODIMP TStdXtra_IMoaNotificationClient::Notify(ConstPMoaNotifyID nid, PMoa
 	DrContextState drContextState;
 	pThis->pObj->pDrContext->PushXtraContext(&drContextState);
 
-	if (pObj->m_bISteamFriends_GameOverlayActivated)
+	if (pThis->pObj->m_bOnSteamServersConnectedReceived)
 	{
-		pObj->m_bISteamFriends_GameOverlayActivated = false;
-
+		pThis->pObj->m_bOnSteamServersConnectedReceived = false;
 		MoaMmSymbol moaSymbol;
-		pObj->pMmValue->StringToSymbol("ISteamFriends_GameOverlayActivated", &moaSymbol);
+		pThis->pObj->pMmValue->StringToSymbol("OnSteamServersConnected", &moaSymbol);
+		pThis->pObj->pDrMovie->CallHandler(moaSymbol, 0, NULL, 0);
+	}
 
+	if (pThis->pObj->m_bOnSteamServersDisconnectedReceived)
+	{
+		pThis->pObj->m_bOnSteamServersDisconnectedReceived = false;
+		MoaMmSymbol moaSymbol;
+		pThis->pObj->pMmValue->StringToSymbol("OnSteamServersDisconnected", &moaSymbol);
+		pThis->pObj->pDrMovie->CallHandler(moaSymbol, 0, NULL, 0);
+	}
+
+	if (pThis->pObj->m_bOnGetNumberOfCurrentPlayersReceived)
+	{
+		pThis->pObj->m_bOnGetNumberOfCurrentPlayersReceived = false;
 		MoaMmValue params[1];
-		pObj->pMmValue->IntegerToValue(pObj->m_bISteamFriends_GameOverlayIsActive, &params[0]);
-		pThis->pObj->pDrMovie->CallHandler(moaSymbol, 1, &params[0], 0);
+		pThis->pObj->pMmValue->IntegerToValue(pThis->pObj->m_NumPlayers, &params[0]);
+		pThis->pObj->pDrMovie->CallHandler(pThis->pObj->m_GetNumberOfCurrentPlayersCallback, 1, &params[0], 0);
 	}
 
 	pThis->pObj->pDrContext->PopXtraContext(&drContextState);
@@ -427,6 +474,8 @@ moa_try
 			pObj->pMmNotification->RegisterNotificationClient(pObj->pNotificationClient, &NID_DrNIdle , 0, this);
 	}
 #endif
+
+	pObj->m_pGameManager = new CGameManager(pObj);
 
 moa_catch
 moa_catch_end
@@ -497,14 +546,67 @@ MoaError TStdXtra_IMoaMmXScript::sx_ISteamFriends_GetPersonaName(PMoaDrCallInfo 
 }
 
 //###########################################################################
+// ISteamFriends_ActivateGameOverlay(string dialogName)
+//###########################################################################
+MoaError TStdXtra_IMoaMmXScript::sx_ISteamFriends_ActivateGameOverlay(PMoaDrCallInfo callPtr)
+{
+	if (pObj->m_bApiInitialized)
+	{
+		MoaMmValue moaValue = { 0 };
+		GetArgByIndex(PARAM(1), &moaValue);
+		const char *dialogName;
+		pObj->pMmValue->ValueToStringPtr(&moaValue, &dialogName);
+
+		// strange bug, "stats" fails for ActivateGameOverlay()
+		if (strcmp(dialogName, "stats") == 0)
+			SteamFriends()->ActivateGameOverlayToUser(dialogName, SteamUser()->GetSteamID());
+		else
+			SteamFriends()->ActivateGameOverlay(dialogName);
+
+		pObj->pMmValue->ValueReleaseStringPtr(&moaValue);
+	}
+
+	return kMoaErr_NoErr;
+}
+
+//###########################################################################
+// ISteamFriends_ActivateGameOverlayToUser(string dialogName, string steamID)
+//###########################################################################
+MoaError TStdXtra_IMoaMmXScript::sx_ISteamFriends_ActivateGameOverlayToUser(PMoaDrCallInfo callPtr)
+{
+	if (pObj->m_bApiInitialized)
+	{
+		MoaMmValue moaValue = { 0 };
+
+		char steamIDStr[64];
+		GetArgByIndex(PARAM(2), &moaValue);
+		pObj->pMmValue->ValueToString(&moaValue, steamIDStr, 64);
+
+		GetArgByIndex(PARAM(1), &moaValue);
+		const char *dialogName;
+		pObj->pMmValue->ValueToStringPtr(&moaValue, &dialogName);
+
+		uint64 ulSteamID = _strtoui64(steamIDStr, NULL, 10);
+
+		SteamFriends()->ActivateGameOverlayToUser(dialogName, CSteamID(ulSteamID));
+
+		pObj->pMmValue->ValueReleaseStringPtr(&moaValue);
+	}
+
+	return kMoaErr_NoErr;
+}
+
+//###########################################################################
 // ISteamUser_GetSteamID() -> integer or void
 //###########################################################################
 MoaError TStdXtra_IMoaMmXScript::sx_ISteamUser_GetSteamID(PMoaDrCallInfo callPtr)
 {
 	if (pObj->m_bApiInitialized)
 	{
-		MoaLong accountID = (SteamUser()->GetSteamID()).GetAccountID();
-		pObj->pMmValue->IntegerToValue(accountID, &callPtr->resultValue);
+		CSteamID steamID = SteamUser()->GetSteamID();
+		char steamIDStr[64];
+		_ui64toa_s(steamID.ConvertToUint64(), steamIDStr, 64, 10);
+		pObj->pMmValue->StringToValue(steamIDStr, &callPtr->resultValue);
 	}
 	return kMoaErr_NoErr;
 }
@@ -649,6 +751,46 @@ MoaError TStdXtra_IMoaMmXScript::sx_ISteamUserStats_StoreStats(PMoaDrCallInfo ca
 }
 
 //###########################################################################
+// sx_ISteamUserStats_ResetAllStats(bool bAchievementsToo) -> bool or void
+//###########################################################################
+MoaError TStdXtra_IMoaMmXScript::sx_ISteamUserStats_ResetAllStats(PMoaDrCallInfo callPtr)
+{
+	if (pObj->m_bApiInitialized)
+	{
+		MoaMmValue moaValue = { 0 };
+
+		MoaLong achievementsToo = 0;
+		GetArgByIndex(PARAM(1), &moaValue);
+		pObj->pMmValue->ValueToInteger(&moaValue, &achievementsToo);
+
+		bool bOk = SteamUserStats()->ResetAllStats((bool)achievementsToo);
+		pObj->pMmValue->IntegerToValue(bOk, &callPtr->resultValue);
+	}
+	return kMoaErr_NoErr;
+}
+
+//###########################################################################
+// ISteamUserStats_StoreStats() -> bool or void
+//###########################################################################
+MoaError TStdXtra_IMoaMmXScript::sx_ISteamUserStats_GetNumberOfCurrentPlayers(PMoaDrCallInfo callPtr)
+{
+	if (pObj->m_bApiInitialized)
+	{
+		MoaMmValue moaValue = { 0 };
+
+		GetArgByIndex(PARAM(1), &moaValue);
+		pObj->pMmValue->ValueToSymbol(&moaValue, &pObj->m_GetNumberOfCurrentPlayersCallback);
+
+		SteamAPICall_t hSteamAPICall = SteamUserStats()->GetNumberOfCurrentPlayers();
+
+		pObj->m_pGameManager->m_NumberOfCurrentPlayersCallResult.Set(hSteamAPICall, pObj->m_pGameManager, &CGameManager::OnGetNumberOfCurrentPlayers);
+
+		pObj->pMmValue->IntegerToValue(1, &callPtr->resultValue);
+	}
+	return kMoaErr_NoErr;
+}
+
+//###########################################################################
 // ISteamUtils_GetAppID() -> integer or void
 //###########################################################################
 MoaError TStdXtra_IMoaMmXScript::sx_ISteamUtils_GetAppID(PMoaDrCallInfo callPtr)
@@ -672,17 +814,4 @@ MoaError TStdXtra_IMoaMmXScript::sx_ISteamUtils_GetIPCountry(PMoaDrCallInfo call
 		pObj->pMmValue->StringToValue(country, &callPtr->resultValue);
 	}
 	return kMoaErr_NoErr;
-}
-
-//###########################################################################
-// Callback
-//###########################################################################
-void TStdXtra_IMoaMmXScript::ISteamFriends_OnGameOverlayActivated(GameOverlayActivated_t* pCallback)
-{
-	pObj->m_bISteamFriends_GameOverlayActivated = true;
-	pObj->m_bISteamFriends_GameOverlayIsActive = pCallback->m_bActive;
-	//if (pCallback->m_bActive)
-	//	DBGS("Steam overlay now active");
-	//else
-	//	DBGS("Steam overlay now inactive");
 }

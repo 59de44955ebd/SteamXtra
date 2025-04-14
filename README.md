@@ -5,8 +5,8 @@ Stub for integrating the Steamworks SDK into games created with Adobe Director f
 ## Current interface
 
 ```
-xtra SteamXtra
--- v0.1 (c) 2025 59de44955ebd
+-- xtra SteamXtra
+-- v0.2 (c) 2025 59de44955ebd
 -- https://github.com/59de44955ebd/SteamXtra
 
 new object me
@@ -18,6 +18,8 @@ SteamAPI_IsSteamRunning object me
 
 -- ISteamFriends
 ISteamFriends_GetPersonaName object me
+ISteamFriends_ActivateGameOverlay object me, string dialogName
+ISteamFriends_ActivateGameOverlayToUser object me, string dialogName, string steamID
 
 -- ISteamUser
 ISteamUser_GetSteamID object me
@@ -30,6 +32,8 @@ ISteamUserStats_SetStatFloat object me, string statName, float data
 ISteamUserStats_GetStatInt object me, string statName
 ISteamUserStats_SetStatInt object me, string statName, integer data
 ISteamUserStats_StoreStats object me
+ISteamUserStats_ResetAllStats object me, integer bAchievementsToo
+ISteamUserStats_GetNumberOfCurrentPlayers object me, symbol callback
 
 -- ISteamUtils
 ISteamUtils_GetAppID object me
