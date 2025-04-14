@@ -1,7 +1,11 @@
 --!movie
 
 global $
+
+-- xtra instance
 global sx
+
+-- some globals for GUI creation
 global _w, _x, _y, _sn, _dy
 
 ----------------------------------------
@@ -9,187 +13,145 @@ global _w, _x, _y, _sn, _dy
 ----------------------------------------
 on startMovie
 
-	_player.debugPlaybackEnabled = 1
+    _player.debugPlaybackEnabled = 1
 
-	put xtra("SteamXtra").interface()
+    --put xtra("SteamXtra").interface()
 
-	sx = xtra("SteamXtra").new()
+    sx = xtra("SteamXtra").new()
 
-	-- 480 is the app_id of demo game "Spacewar"
-	sx.SteamAPI_RestartAppIfNecessary(480)
+    -- 480 is the app_id of demo game "Spacewar"
+    sx.SteamAPI_RestartAppIfNecessary(480)
 
-	init()
+    init()
 
-	movie_width = 340
-	_x = 20
-	_w = 340 - 2 * _x
-	_y = 10
-	_sn = 1
-	_dy = 28
-	q = QUOTE
+    _x = 20
+    _w = 340 - 2 * _x
+    _y = 10
+    _sn = 1
+    _dy = 28
+    q = QUOTE
 
-	-- window settings
-	_movie.stage.title = "Demo Game (faking Spacewar)"
-	_movie.stage.titlebarOptions.visible = TRUE
-	_movie.stage.rect = rect(0, 0, 340, 800)
-	_movie.centerStage = 1
+    -- window settings
+    _movie.stage.title = "Demo Game (faking Spacewar)"
+    _movie.stage.titlebarOptions.visible = TRUE
+    _movie.stage.rect = rect(0, 0, 340, 800)
+    _movie.centerStage = 1
 
-	_addLabel("-- Init/Shutdown --")
+    _addLabel("-- Init/Shutdown --")
 
-	--	SteamAPI_Init object me
-	_addButton("SteamAPI_Init()", "init()")
+    _addButton("SteamAPI_Init()", "init()")
+    _addButton("SteamAPI_Shutdown()", "put _global.sx.SteamAPI_Shutdown()")
 
-	_addButton("SteamAPI_Shutdown()", "put _global.sx.SteamAPI_Shutdown()")
+    _addLabel("-- Get infos --")
 
-	_addLabel("-- Get infos --")
+    _addButton("IsSteamRunning()", "put _global.sx.SteamAPI_IsSteamRunning()")
+    _addButton("GetPersonaName()", "put _global.sx.ISteamFriends_GetPersonaName()")
+    _addButton("GetSteamID()", "put _global.sx.ISteamUser_GetSteamID()")
+    _addButton("GetAppID()", "put _global.sx.ISteamUtils_GetAppID()")
+    _addButton("GetIPCountry()", "put _global.sx.ISteamUtils_GetIPCountry()")
 
-	--	SteamAPI_IsSteamRunning object me
-	_addButton("IsSteamRunning()", "put _global.sx.SteamAPI_IsSteamRunning()")
+    _addLabel("-- ISteamFriends --")
 
-	--	ISteamFriends_GetPersonaName object me
-	_addButton("GetPersonaName()", "put _global.sx.ISteamFriends_GetPersonaName()")
+    _addButton("ActivateGameOverlay('friends')", "_global.sx.ISteamFriends_ActivateGameOverlay("&q&"friends"&q&")")
+    _addButton("ActivateGameOverlay('community')", "_global.sx.ISteamFriends_ActivateGameOverlay("&q&"community"&q&")")
+    _addButton("ActivateGameOverlay('players')", "_global.sx.ISteamFriends_ActivateGameOverlay("&q&"players"&q&")")
+    _addButton("ActivateGameOverlay('settings')", "_global.sx.ISteamFriends_ActivateGameOverlay("&q&"settings"&q&")")
+    _addButton("ActivateGameOverlay('stats')", "_global.sx.ISteamFriends_ActivateGameOverlay("&q&"stats"&q&")")
+    _addButton("ActivateGameOverlay('achievements')", "_global.sx.ISteamFriends_ActivateGameOverlay("&q&"achievements"&q&")")
 
-	--	ISteamUser_GetSteamID object me
-	_addButton("GetSteamID()", "put _global.sx.ISteamUser_GetSteamID()")
+    _addLabel("-- ISteamUserStats - synchronous--")
 
-	--	ISteamUtils_GetAppID object me
-	_addButton("GetAppID()", "put _global.sx.ISteamUtils_GetAppID()")
+    -- Demo game "spacewar" has those 5 achievements:
+    -- - ACH_WIN_ONE_GAME
+    -- - ACH_WIN_100_GAMES
+    -- - ACH_HEAVY_FIRE
+    -- - ACH_TRAVEL_FAR_ACCUM
+    -- - ACH_TRAVEL_FAR_SINGLE
 
-	--	ISteamUtils_GetIPCountry object me
-	_addButton("GetIPCountry()", "put _global.sx.ISteamUtils_GetIPCountry()")
+    _addButton("GetAchievement('ACH_WIN_ONE_GAME')", "put _global.sx.ISteamUserStats_GetAchievement("&q&"ACH_WIN_ONE_GAME"&q&")")
+    _addButton("SetAchievement('ACH_WIN_ONE_GAME')", "put _global.sx.ISteamUserStats_SetAchievement("&q&"ACH_WIN_ONE_GAME"&q&")")
+    _addButton("GetAchievement('ACH_TRAVEL_FAR_ACCUM')", "put _global.sx.ISteamUserStats_GetAchievement("&q&"ACH_TRAVEL_FAR_ACCUM"&q&")")
+    _addButton("SetAchievement('ACH_TRAVEL_FAR_ACCUM')", "put _global.sx.ISteamUserStats_SetAchievement("&q&"ACH_TRAVEL_FAR_ACCUM"&q&")")
+    _addButton("GetStatInt(NumWins)", "put _global.sx.ISteamUserStats_GetStatInt("&q&"NumWins"&q&")")
+    _addButton("SetStatInt(NumWins, +1)", "put _global.sx.ISteamUserStats_SetStatInt("&q&"NumWins"&q&", _global.sx.ISteamUserStats_GetStatInt("&q&"NumWins"&q&") + 1)")
+    _addButton("StoreStats()", "put _global.sx.ISteamUserStats_StoreStats()")
+    _addButton("ResetAllStats(TRUE)", "put _global.sx.ISteamUserStats_ResetAllStats(TRUE)")
 
-	_addLabel("-- ISteamFriends --")
+    _addLabel("-- ISteamUserStats - asynchronous (using callback)")
 
-	-- "ISteamFriends_ActivateGameOverlay object me, string dialogName\n"
-	-- The dialog to open. Valid options are: "friends", "community", "players", "settings", "officialgamegroup", "stats", "achievements".
-	_addButton("ActivateGameOverlay('friends')", "_global.sx.ISteamFriends_ActivateGameOverlay("&q&"friends"&q&")")
-	_addButton("ActivateGameOverlay('community')", "_global.sx.ISteamFriends_ActivateGameOverlay("&q&"community"&q&")")
-	_addButton("ActivateGameOverlay('players')", "_global.sx.ISteamFriends_ActivateGameOverlay("&q&"players"&q&")")
-	_addButton("ActivateGameOverlay('settings')", "_global.sx.ISteamFriends_ActivateGameOverlay("&q&"settings"&q&")")
-	_addButton("ActivateGameOverlay('stats')", "_global.sx.ISteamFriends_ActivateGameOverlay("&q&"stats"&q&")")
-	_addButton("ActivateGameOverlay('achievements')", "_global.sx.ISteamFriends_ActivateGameOverlay("&q&"achievements"&q&")")
+    _addButton("GetNumberOfCurrentPlayers()", "_global.sx.ISteamUserStats_GetNumberOfCurrentPlayers(#OnNumberOfCurrentPlayers)")
 
---	_addButton("ActivateGameOverlayToUser('stats')", "_global.sx.ISteamFriends_ActivateGameOverlayToUser("&q&"stats"&q&", _global.sx.ISteamUser_GetSteamID())")
-
-	_addLabel("-- ISteamUserStats - synchronous--")
-
-	-- Demo game "spacewar" has those 5 achievements:
-	-- - ACH_WIN_ONE_GAME
-	-- - ACH_WIN_100_GAMES
-	-- - ACH_HEAVY_FIRE
-	-- - ACH_TRAVEL_FAR_ACCUM
-	-- - ACH_TRAVEL_FAR_SINGLE
-
-	--	ISteamUserStats_GetAchievement object me, string achievement
-	_addButton("GetAchievement('ACH_WIN_ONE_GAME')", "put _global.sx.ISteamUserStats_GetAchievement("&q&"ACH_WIN_ONE_GAME"&q&")")
-
-	--	ISteamUserStats_SetAchievement object me, string achievement
-	_addButton("SetAchievement('ACH_WIN_ONE_GAME')", "put _global.sx.ISteamUserStats_SetAchievement("&q&"ACH_WIN_ONE_GAME"&q&")")
-
-	_addButton("GetAchievement('ACH_TRAVEL_FAR_ACCUM')", "put _global.sx.ISteamUserStats_GetAchievement("&q&"ACH_TRAVEL_FAR_ACCUM"&q&")")
-	_addButton("SetAchievement('ACH_TRAVEL_FAR_ACCUM')", "put _global.sx.ISteamUserStats_SetAchievement("&q&"ACH_TRAVEL_FAR_ACCUM"&q&")")
-
-	--	ISteamUserStats_GetStatFloat object me, string statName
-	--	ISteamUserStats_SetStatFloat object me, string statName, float data
-
-	--	ISteamUserStats_GetStatInt object me, string statName
-	--	ISteamUserStats_SetStatInt object me, string statName, integer data
-
-	--m_pSteamUserStats->GetStat( "NumGames", &m_nTotalGamesPlayed );
-	_addButton("GetStatInt(NumWins)", "put _global.sx.ISteamUserStats_GetStatInt("&q&"NumWins"&q&")")
-
---	m_pSteamUserStats->GetStat( "NumWins", &m_nTotalNumWins );
---	m_pSteamUserStats->GetStat( "NumLosses", &m_nTotalNumLosses );
---	m_pSteamUserStats->GetStat( "FeetTraveled", &m_flTotalFeetTraveled );
---	m_pSteamUserStats->GetStat( "MaxFeetTraveled", &m_flMaxFeetTraveled );
---	m_pSteamUserStats->GetStat( "AverageSpeed", &m_flAverageSpeed );
-
-	_addButton("SetStatInt(NumWins, +1)", "put _global.sx.ISteamUserStats_SetStatInt("&q&"NumWins"&q&", _global.sx.ISteamUserStats_GetStatInt("&q&"NumWins"&q&") + 1)")
-
-	--	ISteamUserStats_StoreStats object me
-	_addButton("StoreStats()", "put _global.sx.ISteamUserStats_StoreStats()")
-
-	_addButton("ResetAllStats(TRUE)", "put _global.sx.ISteamUserStats_ResetAllStats(TRUE)")
-
-	_addLabel("-- ISteamUserStats - asynchronous (using callback)")
-
-	--	ISteamUserStats_StoreStats object me
-	_addButton("GetNumberOfCurrentPlayers()", "_global.sx.ISteamUserStats_GetNumberOfCurrentPlayers(#OnNumberOfCurrentPlayers)")
-
-	_movie.updateStage()
-	_movie.stage.visible = 1
+    _movie.updateStage()
+    _movie.stage.visible = 1
 end
 
 ----------------------------------------
 --
 ----------------------------------------
 on init
-	ok = sx.SteamAPI_Init()
-	if ok then
-		put "The Steam API was successfully initialized."
-	else
-		put "Error: SteamAPI_Init() returned FALSE!"
-		put "Is the Steam client running?"
-		put "Is there a steam_appid.txt in the projector folder?"
-	end if
-	put
+    ok = sx.SteamAPI_Init()
+    if ok then
+        put "The Steam API was successfully initialized."
+    else
+        put "Error: SteamAPI_Init() returned FALSE!"
+        put "Is the Steam client running?"
+        put "Is there a steam_appid.txt in the projector folder?"
+    end if
+    put
 end
 
 ----------------------------------------
 --
 ----------------------------------------
 on _addButton(text, callback)
-
-	m = new(#button)
-	m.rect = rect(0, 0, _w, 0)
-	m.alignment = "center"
-	m.font = "Arial"
-	m.fontsize = 11
-	m.fontStyle = "bold"
-	m.text = text
-	m.scriptText = "on mouseDown"&RETURN& callback &RETURN&"end"
-	_movie.puppetSprite(_sn, TRUE)
-	sprite(_sn).member = m
-	sprite(_sn).loc = point(_x, _y)
-	_sn = _sn + 1
-	_y = _y + _dy
+    m = new(#button)
+    m.rect = rect(0, 0, _w, 0)
+    m.alignment = "center"
+    m.font = "Arial"
+    m.fontsize = 11
+    m.fontStyle = "bold"
+    m.text = text
+    m.scriptText = "on mouseDown"&RETURN& callback &RETURN&"end"
+    _movie.puppetSprite(_sn, TRUE)
+    sprite(_sn).member = m
+    sprite(_sn).loc = point(_x, _y)
+    _sn = _sn + 1
+    _y = _y + _dy
 end
 
 ----------------------------------------
 --
 ----------------------------------------
 on _addLabel(text)
-	m = new(#field)
-	m.rect = rect(0, 0, _w, 0)
---	m.alignment = "center"
-	m.font = "Arial"
-	m.fontsize = 13
---	m.fontStyle = "bold"
-	m.text = text
-	_movie.puppetSprite(_sn, TRUE)
-	sprite(_sn).member = m
-	sprite(_sn).loc = point(_x, _y)
-	_sn = _sn + 1
-	_y = _y + _dy
+    m = new(#field)
+    m.rect = rect(0, 0, _w, 0)
+    m.font = "Arial"
+    m.fontsize = 13
+    m.text = text
+    _movie.puppetSprite(_sn, TRUE)
+    sprite(_sn).member = m
+    sprite(_sn).loc = point(_x, _y)
+    _sn = _sn + 1
+    _y = _y + _dy
 end
 
 ----------------------------------------
 -- @callback
 ----------------------------------------
 on OnNumberOfCurrentPlayers(numPlayers)
-	put "NumberOfCurrentPlayers:", numPlayers
+    put "NumberOfCurrentPlayers:", numPlayers
 end
 
 ----------------------------------------
 -- @callback
 ----------------------------------------
 on OnSteamServersConnected
-	put ">>> OnSteamServersConnected"
+    put "OnSteamServersConnected was called"
 end
 
 ----------------------------------------
 -- @callback
 ----------------------------------------
 on OnSteamServersDisconnected
-	put ">>> OnSteamServersDisconnected"
+    put "OnSteamServersDisconnected was called"
 end

@@ -40,6 +40,11 @@ ISteamUtils_GetAppID object me
 ISteamUtils_GetIPCountry object me
 ```
 
+## Screenshots
+
+*Director 11.5 demo*  
+![Director 11.5 demo](screenshots/demo.png)
+
 ## Compiling
 
 Compiling the xtra requires MS Visual Studio 2017 or later, the free community edition is of course fine.
