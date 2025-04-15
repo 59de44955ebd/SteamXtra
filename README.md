@@ -50,6 +50,9 @@ ISteamUtils_GetIPCountry object me
 *Director 11.5 demo*  
 ![Director 11.5 demo](screenshots/demo.png)
 
+*Shockwave3D game with integrated Steam overlay*  
+![Shockwave3D game with Steam overlay](screenshots/demo_snowfight_overlay2.png)
+
 ## Compiling
 
 Compiling the xtra requires MS Visual Studio 2017 or later, the free community edition is of course fine.
