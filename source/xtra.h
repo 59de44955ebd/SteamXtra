@@ -72,6 +72,9 @@ EXTERN_BEGIN_DEFINE_CLASS_INSTANCE_VARS(TStdXtra)
 	bool					m_bOnSteamServersConnectedReceived = false;
 	bool					m_bOnSteamServersDisconnectedReceived = false;
 
+	bool					m_bOnGameOverlayActivatedReceived = false;
+	bool					m_bGameOverlayActive = false;
+
 EXTERN_END_DEFINE_CLASS_INSTANCE_VARS
 
 /*****************************************************************************
@@ -138,6 +141,8 @@ public:
 
 	STEAM_CALLBACK(CGameManager, OnSteamServersConnected, SteamServersConnected_t);
 	STEAM_CALLBACK(CGameManager, OnSteamServersDisconnected, SteamServersDisconnected_t);
+
+	STEAM_CALLBACK(CGameManager, OnGameOverlayActivated, GameOverlayActivated_t);
 
 	void OnGetNumberOfCurrentPlayers(NumberOfCurrentPlayers_t *pCallback, bool bIOFailure);
 	CCallResult<CGameManager, NumberOfCurrentPlayers_t> m_NumberOfCurrentPlayersCallResult;

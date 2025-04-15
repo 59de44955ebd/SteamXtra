@@ -22,7 +22,13 @@ on startMovie
     -- 480 is the app_id of demo game "Spacewar"
     sx.SteamAPI_RestartAppIfNecessary(480)
 
-    init()
+	if not sx.SteamAPI_IsSteamRunning() then
+		put "Steam not running, trying to start it..."
+		open "C:\Program Files (x86)\Steam\steam.exe"
+		t = timeout().new("init", 8000, #init)
+	else
+		init()
+	end if
 
     _x = 20
     _w = 340 - 2 * _x
@@ -88,7 +94,8 @@ end
 ----------------------------------------
 --
 ----------------------------------------
-on init
+on init (_, t)
+	if not voidp(t) then t.forget()
     ok = sx.SteamAPI_Init()
     if ok then
         put "The Steam API was successfully initialized."
@@ -103,12 +110,12 @@ end
 ----------------------------------------
 --
 ----------------------------------------
-on _addButton(text, callback)
+on _addButton (text, callback)
     m = new(#button)
     m.rect = rect(0, 0, _w, 0)
     m.alignment = "center"
-    m.font = "Arial"
-    m.fontsize = 11
+    m.font = "MS Sans Serif"
+    m.fontsize = 10
     m.fontStyle = "bold"
     m.text = text
     m.scriptText = "on mouseDown"&RETURN& callback &RETURN&"end"
@@ -122,11 +129,11 @@ end
 ----------------------------------------
 --
 ----------------------------------------
-on _addLabel(text)
+on _addLabel (text)
     m = new(#field)
     m.rect = rect(0, 0, _w, 0)
-    m.font = "Arial"
-    m.fontsize = 13
+    m.font = "MS Sans Serif"
+    m.fontsize = 10
     m.text = text
     _movie.puppetSprite(_sn, TRUE)
     sprite(_sn).member = m
@@ -138,20 +145,35 @@ end
 ----------------------------------------
 -- @callback
 ----------------------------------------
-on OnNumberOfCurrentPlayers(numPlayers)
-    put "NumberOfCurrentPlayers:", numPlayers
-end
-
-----------------------------------------
--- @callback
-----------------------------------------
 on OnSteamServersConnected
-    put "OnSteamServersConnected was called"
+  _player.alert("Steam server reconnected!")
 end
 
 ----------------------------------------
 -- @callback
 ----------------------------------------
 on OnSteamServersDisconnected
-    put "OnSteamServersDisconnected was called"
+  _player.alert("Steam server disconnected!")
+end
+
+----------------------------------------
+-- @callback
+-- This will only be triggered in Shockwave3D games,
+-- when the game overlay is injected into the 3D world,
+-- but not in 2D games when the overlay is instead shown
+-- in an independant window.
+----------------------------------------
+on OnGameOverlayActivated (isActive)
+  if isActive then
+    _player.alert("Game overlay now shown")
+  else
+    _player.alert("Game overlay now hidden")
+  end if
+end
+
+----------------------------------------
+-- @callback
+----------------------------------------
+on OnNumberOfCurrentPlayers (numPlayers)
+  _player.alert("Number of current players:" && numPlayers)
 end

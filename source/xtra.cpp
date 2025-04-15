@@ -36,6 +36,12 @@ void CGameManager::OnSteamServersDisconnected(SteamServersDisconnected_t* pCallb
 	m_pObj->m_bOnSteamServersDisconnectedReceived = true;
 }
 
+void CGameManager::OnGameOverlayActivated(GameOverlayActivated_t* pCallback)
+{
+	m_pObj->m_bOnGameOverlayActivatedReceived = true;
+	m_pObj->m_bGameOverlayActive = pCallback->m_bActive;
+}
+
 /*******************************************************************************
  * SCRIPTING XTRA MESSAGE TABLE DESCRIPTION.
  *
@@ -436,6 +442,16 @@ STDMETHODIMP TStdXtra_IMoaNotificationClient::Notify(ConstPMoaNotifyID nid, PMoa
 		MoaMmValue params[1];
 		pThis->pObj->pMmValue->IntegerToValue(pThis->pObj->m_NumPlayers, &params[0]);
 		pThis->pObj->pDrMovie->CallHandler(pThis->pObj->m_GetNumberOfCurrentPlayersCallback, 1, &params[0], 0);
+	}
+
+	if (pThis->pObj->m_bOnGameOverlayActivatedReceived)
+	{
+		pThis->pObj->m_bOnGameOverlayActivatedReceived = false;
+		MoaMmSymbol moaSymbol;
+		pThis->pObj->pMmValue->StringToSymbol("OnGameOverlayActivated", &moaSymbol);
+		MoaMmValue params[1];
+		pThis->pObj->pMmValue->IntegerToValue((MoaLong)pThis->pObj->m_bGameOverlayActive, &params[0]);
+		pThis->pObj->pDrMovie->CallHandler(moaSymbol, 1, &params[0], 0);
 	}
 
 	pThis->pObj->pDrContext->PopXtraContext(&drContextState);
