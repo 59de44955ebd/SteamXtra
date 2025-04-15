@@ -40,6 +40,11 @@ ISteamUtils_GetAppID object me
 ISteamUtils_GetIPCountry object me
 ```
 
+### Global callbacks (put handlers with those names into movie script to get notified):
+- OnSteamServersConnected
+- OnSteamServersDisconnected
+- OnGameOverlayActivated (boolOverlayNowVisible)
+
 ## Screenshots
 
 *Director 11.5 demo*  
