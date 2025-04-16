@@ -158,14 +158,18 @@ end
 -- @callback
 ----------------------------------------
 on OnSteamServersConnected
-  _player.alert("Steam server reconnected!")
+--  _player.alert("Steam server reconnected!")
+  MB_ICONINFORMATION = 64
+  sysMenuMessageBox("Steam server reconnected", "Steam callback", MB_ICONINFORMATION)
 end
 
 ----------------------------------------
 -- @callback
 ----------------------------------------
 on OnSteamServersDisconnected
-  _player.alert("Steam server disconnected!")
+  --_player.alert("Steam server disconnected!")
+  MB_ICONEXCLAMATION = 48
+  sysMenuMessageBox("Steam server disconnected", "Steam callback", MB_ICONEXCLAMATION)
 end
 
 ----------------------------------------
@@ -176,10 +180,13 @@ end
 -- in an independant window.
 ----------------------------------------
 on OnGameOverlayActivated (isActive)
+  MB_ICONINFORMATION = 64
   if isActive then
-    _player.alert("Game overlay now shown")
+--    _player.alert("Game overlay now shown")
+    sysMenuMessageBox("Game overlay now shown", "Steam callback", MB_ICONINFORMATION)
   else
-    _player.alert("Game overlay now hidden")
+--    _player.alert("Game overlay now hidden")
+    sysMenuMessageBox("Game overlay now hidden", "Steam callback", MB_ICONINFORMATION)
   end if
 end
 
@@ -187,5 +194,7 @@ end
 -- @callback
 ----------------------------------------
 on OnNumberOfCurrentPlayers (numPlayers)
-  _player.alert("Number of current players:" && numPlayers)
+--  _player.alert("Number of current players:" && numPlayers)
+  MB_ICONINFORMATION = 64
+  sysMenuMessageBox("Number of current players:" && numPlayers, "Steam callback", MB_ICONINFORMATION)
 end
