@@ -13,23 +13,6 @@ global _w, _x, _y, _sn, _dy
 ----------------------------------------
 on startMovie
 
-    _player.debugPlaybackEnabled = 1
-
-    --put xtra("SteamXtra").interface()
-
-    sx = xtra("SteamXtra").new()
-
-    -- 480 is the app_id of demo game "Spacewar"
-    sx.SteamAPI_RestartAppIfNecessary(480)
-
-	if not sx.SteamAPI_IsSteamRunning() then
-		put "Steam not running, trying to start it..."
-		open "C:\Program Files (x86)\Steam\steam.exe"
-		t = timeout().new("init", 8000, #init)
-	else
-		init()
-	end if
-
     _x = 20
     _w = 340 - 2 * _x
     _y = 10
@@ -42,21 +25,22 @@ on startMovie
     _movie.stage.titlebarOptions.visible = TRUE
     _movie.stage.rect = rect(0, 0, 340, 800)
     _movie.centerStage = 1
+    _movie.stage.bgColor = rgb("#141414")
 
-    _addLabel("-- Init/Shutdown --")
+    _addLabel("-- Init/Shutdown")
 
     _addButton("SteamAPI_Init()", "init()")
-    _addButton("SteamAPI_Shutdown()", "put _global.sx.SteamAPI_Shutdown()")
+    _addButton("SteamAPI_Shutdown()", "println _global.sx.SteamAPI_Shutdown()")
 
-    _addLabel("-- Get infos --")
+    _addLabel("-- Get infos")
 
-    _addButton("IsSteamRunning()", "put _global.sx.SteamAPI_IsSteamRunning()")
-    _addButton("GetPersonaName()", "put _global.sx.ISteamFriends_GetPersonaName()")
-    _addButton("GetSteamID()", "put _global.sx.ISteamUser_GetSteamID()")
-    _addButton("GetAppID()", "put _global.sx.ISteamUtils_GetAppID()")
-    _addButton("GetIPCountry()", "put _global.sx.ISteamUtils_GetIPCountry()")
+    _addButton("IsSteamRunning()", "println _global.sx.SteamAPI_IsSteamRunning()")
+    _addButton("GetPersonaName()", "println _global.sx.ISteamFriends_GetPersonaName()")
+    _addButton("GetSteamID()", "println _global.sx.ISteamUser_GetSteamID()")
+    _addButton("GetAppID()", "println _global.sx.ISteamUtils_GetAppID()")
+    _addButton("GetIPCountry()", "println _global.sx.ISteamUtils_GetIPCountry()")
 
-    _addLabel("-- ISteamFriends --")
+    _addLabel("-- ISteamFriends")
 
     _addButton("ActivateGameOverlay('friends')", "_global.sx.ISteamFriends_ActivateGameOverlay("&q&"friends"&q&")")
     _addButton("ActivateGameOverlay('community')", "_global.sx.ISteamFriends_ActivateGameOverlay("&q&"community"&q&")")
@@ -65,7 +49,7 @@ on startMovie
     _addButton("ActivateGameOverlay('stats')", "_global.sx.ISteamFriends_ActivateGameOverlay("&q&"stats"&q&")")
     _addButton("ActivateGameOverlay('achievements')", "_global.sx.ISteamFriends_ActivateGameOverlay("&q&"achievements"&q&")")
 
-    _addLabel("-- ISteamUserStats - synchronous--")
+    _addLabel("-- ISteamUserStats - synchronous")
 
     -- Demo game "spacewar" has those 5 achievements:
     -- - ACH_WIN_ONE_GAME
@@ -74,21 +58,46 @@ on startMovie
     -- - ACH_TRAVEL_FAR_ACCUM
     -- - ACH_TRAVEL_FAR_SINGLE
 
-    _addButton("GetAchievement('ACH_WIN_ONE_GAME')", "put _global.sx.ISteamUserStats_GetAchievement("&q&"ACH_WIN_ONE_GAME"&q&")")
-    _addButton("SetAchievement('ACH_WIN_ONE_GAME')", "put _global.sx.ISteamUserStats_SetAchievement("&q&"ACH_WIN_ONE_GAME"&q&")")
-    _addButton("GetAchievement('ACH_TRAVEL_FAR_ACCUM')", "put _global.sx.ISteamUserStats_GetAchievement("&q&"ACH_TRAVEL_FAR_ACCUM"&q&")")
-    _addButton("SetAchievement('ACH_TRAVEL_FAR_ACCUM')", "put _global.sx.ISteamUserStats_SetAchievement("&q&"ACH_TRAVEL_FAR_ACCUM"&q&")")
-    _addButton("GetStatInt(NumWins)", "put _global.sx.ISteamUserStats_GetStatInt("&q&"NumWins"&q&")")
-    _addButton("SetStatInt(NumWins, +1)", "put _global.sx.ISteamUserStats_SetStatInt("&q&"NumWins"&q&", _global.sx.ISteamUserStats_GetStatInt("&q&"NumWins"&q&") + 1)")
-    _addButton("StoreStats()", "put _global.sx.ISteamUserStats_StoreStats()")
-    _addButton("ResetAllStats(TRUE)", "put _global.sx.ISteamUserStats_ResetAllStats(TRUE)")
+    _addButton("GetAchievement('ACH_WIN_ONE_GAME')", "println _global.sx.ISteamUserStats_GetAchievement("&q&"ACH_WIN_ONE_GAME"&q&")")
+    _addButton("SetAchievement('ACH_WIN_ONE_GAME')", "println _global.sx.ISteamUserStats_SetAchievement("&q&"ACH_WIN_ONE_GAME"&q&")")
+    _addButton("GetAchievement('ACH_TRAVEL_FAR_ACCUM')", "println _global.sx.ISteamUserStats_GetAchievement("&q&"ACH_TRAVEL_FAR_ACCUM"&q&")")
+    _addButton("SetAchievement('ACH_TRAVEL_FAR_ACCUM')", "println _global.sx.ISteamUserStats_SetAchievement("&q&"ACH_TRAVEL_FAR_ACCUM"&q&")")
+    _addButton("GetStatInt(NumWins)", "println _global.sx.ISteamUserStats_GetStatInt("&q&"NumWins"&q&")")
+    _addButton("SetStatInt(NumWins, +1)", "println _global.sx.ISteamUserStats_SetStatInt("&q&"NumWins"&q&", _global.sx.ISteamUserStats_GetStatInt("&q&"NumWins"&q&") + 1)")
+    _addButton("StoreStats()", "println _global.sx.ISteamUserStats_StoreStats()")
+    _addButton("ResetAllStats(TRUE)", "println _global.sx.ISteamUserStats_ResetAllStats(TRUE)")
 
     _addLabel("-- ISteamUserStats - asynchronous (using callback)")
 
     _addButton("GetNumberOfCurrentPlayers()", "_global.sx.ISteamUserStats_GetNumberOfCurrentPlayers(#OnNumberOfCurrentPlayers)")
 
+    _player.debugPlaybackEnabled = 1
+    sysMenuUseDarkMessageWindow()
+
     _movie.updateStage()
     _movie.stage.visible = 1
+
+    sysMenuUseDarkMode()
+
+    sx = xtra("SteamXtra").new()
+
+    -- 480 is the app_id of demo game "Spacewar"
+    sx.SteamAPI_RestartAppIfNecessary(480)
+
+    sysMenuPrintMsg xtra("SteamXtra").interface()
+	sysMenuPrintMsg "\n\n"
+
+	if not sx.SteamAPI_IsSteamRunning() then
+		sysMenuPrintMsg "Steam not running, trying to start it...\n"
+		open "C:\Program Files (x86)\Steam\steam.exe"
+		t = timeout().new("init", 8000, #init)
+	else
+		init()
+	end if
+end
+
+on println (msg)
+	sysMenuPrintMsg string(msg) & RETURN
 end
 
 ----------------------------------------
@@ -98,13 +107,12 @@ on init (_, t)
 	if not voidp(t) then t.forget()
     ok = sx.SteamAPI_Init()
     if ok then
-        put "The Steam API was successfully initialized."
+        sysMenuPrintMsg "The Steam API was successfully initialized.\n"
     else
-        put "Error: SteamAPI_Init() returned FALSE!"
-        put "Is the Steam client running?"
-        put "Is there a steam_appid.txt in the projector folder?"
+        sysMenuPrintMsg "Error: SteamAPI_Init() returned FALSE!\n"
+        sysMenuPrintMsg "Is the Steam client running?\n"
+        sysMenuPrintMsg "Is there a steam_appid.txt in the projector folder?\n"
     end if
-    put
 end
 
 ----------------------------------------
@@ -112,13 +120,14 @@ end
 ----------------------------------------
 on _addButton (text, callback)
     m = new(#button)
+    m.bgcolor = rgb("#454545")
+    m.color = rgb("#FFFFFF")
     m.rect = rect(0, 0, _w, 0)
     m.alignment = "center"
     m.font = "MS Sans Serif"
-    m.fontsize = 10
-    m.fontStyle = "bold"
+    m.fontsize = 12
     m.text = text
-    m.scriptText = "on mouseDown"&RETURN& callback &RETURN&"end"
+    m.scriptText = "on mouseUp"&RETURN& callback &RETURN&"end"
     _movie.puppetSprite(_sn, TRUE)
     sprite(_sn).member = m
     sprite(_sn).loc = point(_x, _y)
@@ -130,7 +139,10 @@ end
 --
 ----------------------------------------
 on _addLabel (text)
+	_y = _y + 5
     m = new(#field)
+    m.bgcolor = rgb("#141414")
+    m.color = rgb("#FFFFFF")
     m.rect = rect(0, 0, _w, 0)
     m.font = "MS Sans Serif"
     m.fontsize = 10
