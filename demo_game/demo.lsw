@@ -71,13 +71,12 @@ on startMovie
 
     _addButton("GetNumberOfCurrentPlayers()", "_global.sx.ISteamUserStats_GetNumberOfCurrentPlayers(#OnNumberOfCurrentPlayers)")
 
-    _player.debugPlaybackEnabled = 1
-    sysMenuUseDarkMessageWindow()
-
     _movie.updateStage()
     _movie.stage.visible = 1
 
     sysMenuUseDarkMode()
+
+    _player.debugPlaybackEnabled = 1
 
     sx = xtra("SteamXtra").new()
 
@@ -107,11 +106,11 @@ on init (_, t)
 	if not voidp(t) then t.forget()
     ok = sx.SteamAPI_Init()
     if ok then
-        sysMenuPrintMsg "The Steam API was successfully initialized.\n"
+        sysMenuPrintMsg "The Steam API was successfully initialized.\n\n"
     else
         sysMenuPrintMsg "Error: SteamAPI_Init() returned FALSE!\n"
         sysMenuPrintMsg "Is the Steam client running?\n"
-        sysMenuPrintMsg "Is there a steam_appid.txt in the projector folder?\n"
+        sysMenuPrintMsg "Is there a steam_appid.txt in the projector folder?\n\n"
     end if
 end
 
